@@ -1,11 +1,5 @@
-from openpyxl import Workbook
 from bs4 import BeautifulSoup
-import re
-
-from typing import List, Union, Iterator, Tuple
-from bs4.element import Tag
-
-from base.parser import Parser
+from html2excel.base.parser import Parser
 
 
 class ExcelParser(Parser):
@@ -16,7 +10,7 @@ class ExcelParser(Parser):
         # TODO: handle case when rows are merged
         data = self.read_file()
         soup = BeautifulSoup(data, features='html.parser')
-        table_data = self.get_table_data(soup)
+        table_data = soup.table
         data_rows = self.get_row(table_data, ["tr"])
         for i, row in enumerate(data_rows, 1):
             columns = self.get_row(row, ["th", "td"])
