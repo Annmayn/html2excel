@@ -1,6 +1,6 @@
 import os
 import sys
-from html2excel.excel.parser import ExcelParser
+from html2excel import ExcelParser
 
 # SAMPLE CODE
 if __name__ == "__main__":
