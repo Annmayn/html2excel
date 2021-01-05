@@ -11,6 +11,8 @@ class ExcelParser(Parser):
         data = self.read_file()
         soup = BeautifulSoup(data, features='html.parser')
         table_data = soup.table
+        if table_data is None:
+            raise Exception("No table found")
         data_rows = self.get_row(table_data, ["tr"])
         for i, row in enumerate(data_rows, 1):
             columns = self.get_row(row, ["th", "td"])
