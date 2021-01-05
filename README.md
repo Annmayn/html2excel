@@ -1,8 +1,6 @@
 # HTML2Excel Documentation
 Library to convert HTML Tables to Excel file.
 
-## Installation
-pip install -e .
 
 ## Usage
 
