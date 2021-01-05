@@ -2,6 +2,10 @@
 Library to convert HTML Tables to Excel file.
 
 
+## Installation
+```pip install html2excel```
+
+
 ## Usage
 
 ```python
