@@ -8,6 +8,11 @@ Library to convert HTML Tables to Excel file.
 
 ## Usage
 
+### Running from command line
+
+```python -m html2excel input_file output_file```
+
+### Using as package
 ```python
 from html2excel import ExcelParser
 
