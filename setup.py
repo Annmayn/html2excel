@@ -14,4 +14,5 @@ setup(
     install_requires = ['bs4', 'openpyxl'],
     license = "MIT",
     packages = find_packages(),
+    url = "https://github.com/Annmayn/html2excel",
 )
