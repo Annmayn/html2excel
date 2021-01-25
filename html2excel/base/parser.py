@@ -9,8 +9,12 @@ class Parser:
         self.wb = Workbook()
         self.ws = self.wb.active
         self.file_path = file_path
+        self.load_workbook()
 
-    def read_file(self):
+    def load_workbook(self):
+        raise NotImplemented
+
+    def _read_file(self):
         """
         returns the data contained in a file
         """
@@ -21,12 +25,12 @@ class Parser:
         except:
             raise Exception("Error while reading input file")
 
-    def get_row(self, table: Tag, tags: Union[List, str]) -> Iterator[Tag]:
+    def _get_row(self, table: Tag, tags: Union[List, str]) -> Iterator[Tag]:
         row_data = table.find_all(tags)
         for each in row_data:
             yield each
 
-    def pre_validate_and_format(self, i: int, j: int, col: Tag) -> Tuple[int, str]:
+    def _pre_validate_and_format(self, i: int, j: int, col: Tag) -> Tuple[int, str]:
         attrs = col.attrs
         end = j
         if "colspan" in attrs:
@@ -38,13 +42,13 @@ class Parser:
         end += 1
         return (end, col.text.strip())
 
-    def write_cell(self, row, col, val) -> None:
+    def _write_cell(self, row, col, val) -> None:
         self.ws.cell(row=row, column=col).value = val
 
     def get_workbook(self) -> Workbook:
         return self.wb
 
-    def save_workbook(self, loc) -> bool:
+    def _save_workbook(self, loc) -> bool:
         try:
             self.wb.save(loc)
             return True
