@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name="html2excel",
-    version="0.0.5",
+    version="0.0.6",
     author="Neema Tsering",
     author_email="ntvirus333@gmail.com",
     description=("Convert HTML Table to Excel file"),
