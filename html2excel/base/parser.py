@@ -12,6 +12,7 @@ class Parser:
         self.load_workbook()
 
     def load_workbook(self):
+
         '''
             reads file and loads it into respective format
             ready for dumping to file

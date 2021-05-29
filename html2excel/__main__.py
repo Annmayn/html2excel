@@ -2,6 +2,7 @@ import sys
 # from html2excel import ExcelParser
 from html2excel.excel.parser import ExcelParser
 
+
 def run():
     if len(sys.argv) == 3:
         file_path = sys.argv[1]
