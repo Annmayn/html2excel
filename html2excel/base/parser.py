@@ -21,6 +21,10 @@ class Parser:
     def _read_file(self):
         """
         returns the data contained in a file
+        Returns
+        -------
+        data : bytes
+                File stream
         """
         try:
             with open(self.file_path, 'r', encoding='utf-8') as f:
@@ -30,11 +34,40 @@ class Parser:
             raise Exception("Error while reading input file")
 
     def _get_row(self, table: Tag, tags: Union[List, str]) -> Iterator[Tag]:
+        '''
+            reads all tags present inside a parent tag
+            and returns a generator
+            Parameters
+            ----------
+            table : Tag
+                    parent tag
+            tags : List[str] or str
+                    tags to search for in parent tag `table`
+            Returns
+            -------
+            iter_tag : Iterator[Tag]
+                    Generator consisting of all occurences of `tags` in `table`
+        '''
         row_data = table.find_all(tags)
         for each in row_data:
             yield each
 
-    def _pre_validate_and_format(self, start_row: int, start_col: int, col: Tag) -> Tuple[int, str]:
+    def _pre_validate_and_format(self, start_row: int, start_col: int, col: Tag) -> str:
+        """
+            formats cells according to attribute tags/ metadata
+            Parameters
+            ----------
+            start_row : int
+                    Start of the row
+            start_col : int
+                    Start of the column
+            col : Tag
+                    Cell details including value and metadata
+            Returns
+            -------
+            value: str
+                    Cell value
+        """
         attrs = col.attrs
         end_row = start_row
         end_col = start_col
@@ -53,13 +86,31 @@ class Parser:
         return col.text.strip()
             
 
-    def _write_cell(self, row, col, val) -> None:
+    def _write_cell(self, row: int, col: int, val: str) -> None:
+        """
+            writes value to cell
+            Parameters
+            ----------
+            row : int
+                    row number
+            col : int
+                    column number
+            val : str
+                    Value to write in cell
+        """
         self.ws.cell(row=row, column=col).value = val
 
     def get_workbook(self) -> Workbook:
         return self.wb
 
-    def _save_workbook(self, loc) -> bool:
+    def _save_workbook(self, loc: str) -> bool:
+        """
+            saves workbook to specified location
+            Parameters
+            ----------
+            loc : str
+                    save location for workbook
+        """
         try:
             self.wb.save(loc)
             return True
