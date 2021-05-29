@@ -1,6 +1,6 @@
 import sys
-from html2excel import ExcelParser
-
+# from html2excel import ExcelParser
+from excel.parser import ExcelParser
 
 def run():
     if len(sys.argv) == 3:
