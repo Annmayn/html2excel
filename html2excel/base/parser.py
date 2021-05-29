@@ -12,6 +12,10 @@ class Parser:
         self.load_workbook()
 
     def load_workbook(self):
+        '''
+            reads file and loads it into respective format
+            ready for dumping to file
+        '''
         raise NotImplemented
 
     def _read_file(self):
@@ -19,7 +23,7 @@ class Parser:
         returns the data contained in a file
         """
         try:
-            with open(self.file_path, 'r') as f:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
                 data = f.read()
             return data
         except:
