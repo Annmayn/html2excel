@@ -1,14 +1,14 @@
+from openpyxl import Workbook
 from bs4 import BeautifulSoup
-from html2excel.base.parser import Parser
-# from base.parser import Parser
+from html2excel.base.parser import BaseParser
+
 from bs4.element import Tag
 from collections import defaultdict
 
 from typing import Dict, List, Tuple, Set, Optional
 
 
-
-class ExcelParser(Parser):
+class ExcelParser(BaseParser):
     def __init__(self, file_path: str):
         """
         Parameters
@@ -16,115 +16,90 @@ class ExcelParser(Parser):
         file_path : str
                 Path where the html file is located
         """
+        self.wb = Workbook()
+        self.ws = self.wb.active
         super().__init__(file_path)
 
-    def set_parsed_cells_to_invalid(self, row_no: int, col_no: int, rowspan: int, colspan: int, valid_cols_for_rows) -> None:
+    def get_workbook(self) -> Workbook:
+        return self.wb
+
+    def _save_workbook(self, loc: str) -> bool:
         """
-            Sets all iterated cells to False
+            saves workbook to specified location
             Parameters
             ----------
-            row_no : int
-                    Row number
-            col_no : int
-                    Column number
-            rowspan : int
-                    Number of rows the current cell spans
-            colspan : int
-                    Number of columns the current cell spans
-            valid_cols_for_rows : Dict[int, Dict[int, bool | None]]
-                    dictionary of dictionary which contains information about the validity of each cell
+            loc : str
+                    save location for workbook
         """
-        rowspan -= 1
-        while rowspan >= 0:
-            tmp_colspan = colspan - 1
-            while tmp_colspan >= 0:
-                valid_cols_for_rows[row_no + rowspan][col_no + tmp_colspan] = False
-                tmp_colspan -= 1
-            rowspan -= 1
-    
-    def set_neighbor_cells_to_valid(self, row_no, col_no, rowspan, colspan, valid_cols_for_rows):
+        try:
+            self.wb.save(loc)
+            return True
+        except:
+            return False
+
+    def _write_cell(self, row: int, col: int, val: str) -> None:
         """
-            sets neighboring cells from current cell to valid
+            writes value to cell
             Parameters
             ----------
-            row_no : int
-                    Row number
-            col_no : int
-                    Column number
-            rowspan : int
-                    Number of rows the current cell spans
-            colspan : int
-                    Number of columns the current cell spans
-            valid_cols_for_rows : Dict[int, Dict[int, bool | None]]
-                    dictionary of dictionary which contains information about the validity of each cell
-
-        """ 
-        # add bottom cell as valid
-        i = row_no + rowspan
-        if valid_cols_for_rows[i][col_no] != False:
-            valid_cols_for_rows[row_no + rowspan][col_no] = True
-
-        # add side cells as valid
-        rowspan_iter = rowspan - 1
-        while rowspan_iter >= 0:
-            i = row_no + rowspan_iter
-            j = col_no + colspan
-            if valid_cols_for_rows[i][j] != False:
-                valid_cols_for_rows[i][j] = True
-            rowspan_iter -= 1
-    
-    def get_cell_value_map(self, all_data_html: Tag) -> Dict[int, List[Tuple[int, Tag]]]:
+            row : int
+                    row number
+            col : int
+                    column number
+            val : str
+                    Value to write in cell
         """
-            iterates over the html body and creates
-            a cell value mapping
-            Parameters
-            ----------
-            all_data_html: Tag
-                    Html body
-            Returns
-            -------
-            cell_map_dict : Dict[int, List[Tuple[int, Tag]]]
-                    dictionary that maps a row to its corresponding columns and values
-        """
-        # cell_map_dict = {"1":[(1, 'a'), (2, 'b'), (3,'c'), (4,'d'), (5,'e'), (6,'f')], "2":[(3,'g'),(5,'h'), (6,'i')], "3":[(2,'j')]}
-        cell_map_dict = defaultdict(list)
-        valid_cols_for_rows: Dict[int, Dict[int, Optional[bool]]] = defaultdict(lambda : defaultdict(lambda: None))
-        offset = 0
-        for each in all_data_html:
-            # respect line breaks if <br> tag is added so as to mimic excel's parsing strategy
-            if each.name == 'br':
-                offset += 1
-            elif each.name == 'table':
-                data_rows = self._get_row(each, ["tr"])
-                for row_no, row in enumerate(data_rows, 1):
-                    row_no += offset
-                    columns = self._get_row(row, ["th", "td"])
+        self.ws.cell(row=row, column=col).value = val
 
-                    next_col = 1
-                    for col in columns:
-                        col_no = next_col
-                        while not (valid_cols_for_rows[row_no][col_no] or valid_cols_for_rows[row_no][col_no] is None):
-                            col_no += 1
-                        attrs = col.attrs
-                        cell_map_dict[row_no].append((col_no, col))
-                        next_col = col_no + 1
-                        
-                        colspan = int(attrs.get("colspan", 1))
-                        rowspan = int(attrs.get("rowspan", 1))
-                        self.set_neighbor_cells_to_valid(row_no, col_no, rowspan, colspan, valid_cols_for_rows)
-                        self.set_parsed_cells_to_invalid(row_no, col_no, rowspan, colspan, valid_cols_for_rows)
-                offset += row_no
-        return cell_map_dict
     
+
+    
+
+    def _pre_validate_and_format(self, start_row: int, start_col: int, col: Tag) -> str:
+        """
+        formats cells according to attribute tags/ metadata
+        Parameters
+        ----------
+        start_row : int
+                Start of the row
+        start_col : int
+                Start of the column
+        col : Tag
+                Cell details including value and metadata
+        Returns
+        -------
+        value: str
+                Cell value
+        """
+        attrs = col.attrs
+        end_row = start_row
+        end_col = start_col
+        if "colspan" in attrs:
+            colspan = int(attrs.get("colspan", 1))
+            end_col += colspan - 1
+        if "rowspan" in attrs:
+            rowspan = int(attrs.get("rowspan", 1))
+            end_row += rowspan - 1
+
+        # Merge cells
+        self.ws.merge_cells(
+            start_row=start_row,
+            end_row=end_row,
+            start_column=start_col,
+            end_column=end_col,
+        )
+
+        # TODO: Handle bold, italics and other attributes
+        return col.text.strip()
 
     def load_workbook(self):
         data = self._read_file()
-        soup = BeautifulSoup(data, features='html5lib')
+        soup = BeautifulSoup(data, features="html5lib")
 
         all_data_html = soup.html.body.find_all(recursive=False)
         if all_data_html is None:
             raise Exception("No table found")
-        
+
         cell_map_dict = self.get_cell_value_map(all_data_html)
         for row in cell_map_dict:
             for col, tag in cell_map_dict[row]:
@@ -133,11 +108,11 @@ class ExcelParser(Parser):
 
     def to_excel(self, save_file_path: str) -> None:
         """
-            convert html file to excel and save it to a path
-            Parameters
-            ----------
-            save_file_path : str
-                    file path where the excel file is saved
+        convert html file to excel and save it to a path
+        Parameters
+        ----------
+        save_file_path : str
+                file path where the excel file is saved
         """
-
+        self.load_workbook()
         self._save_workbook(save_file_path)
