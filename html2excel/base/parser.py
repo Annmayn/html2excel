@@ -5,8 +5,9 @@ from typing import List, Union, Iterator, Tuple, Dict, Optional
 
 
 class BaseParser:
-    def __init__(self, file_path):
+    def __init__(self, file_path: str, enc: str):
         self.file_path = file_path
+        self.encoding = enc
 
     def _read_file(self):
         """
@@ -17,7 +18,7 @@ class BaseParser:
                 File stream
         """
         try:
-            with open(self.file_path, 'r', encoding='utf-8') as f:
+            with open(self.file_path, 'r', encoding=self.encoding) as f:
                 data = f.read()
             return data
         except:

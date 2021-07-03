@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple, Set, Optional
 
 
 class ExcelParser(BaseParser):
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, enc: str = 'utf-8'):
         """
         Parameters
         ----------
@@ -18,7 +18,7 @@ class ExcelParser(BaseParser):
         """
         self.wb = Workbook()
         self.ws = self.wb.active
-        super().__init__(file_path)
+        super().__init__(file_path, enc)
 
     def get_workbook(self) -> Workbook:
         return self.wb
