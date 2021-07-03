@@ -1,19 +1,24 @@
 import sys
+import argparse
 from html2excel.excel.parser import ExcelParser
 
 
 def run():
-    if len(sys.argv) == 3:
-        file_path = sys.argv[1]
-        save_path = sys.argv[2]
-        parser = ExcelParser(file_path)
-        parser.to_excel(save_path)
-    else:
-        # First argument for file name, we'll ignore that
-        print("Expected 2 arguments. Got {num}".format(num=len(sys.argv)-1))
+    argparser = argparse.ArgumentParser(description="Convert HTML files to excel")
+    argparser.add_argument("input_path", type=str, help="HTML file location")
+    argparser.add_argument("output_path", type=str, help="Excel file save path")
+    argparser.add_argument(
+        "--enc",
+        type=str,
+        default="utf-8",
+        help="Encoding to use while reading HTML file",
+    )
+
+    args = argparser.parse_args()
+
+    parser = ExcelParser(file_path=args.input_path, enc=args.enc)
+    parser.to_excel(args.output_path)
 
 
 if __name__ == "__main__":
     run()
-
-# TODO: handle exceptions
