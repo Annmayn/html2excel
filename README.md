@@ -15,7 +15,10 @@ A sample flask host code is provided [in this link](https://github.com/Annmayn/s
 
 ### Running from command line
 
-```python -m html2excel input_file output_file```
+```python -m html2excel input_file output_file --enc encoding```
+
+
+* Run **python -m html2excel -h** for more info
 
 ### Using as package
 ```python
