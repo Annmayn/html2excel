@@ -15,6 +15,9 @@ class ExcelParser(BaseParser):
         ----------
         file_path : str
                 Path where the html file is located
+        
+        enc: str, optional
+                Encoding to use while reading file
         """
         self.wb = Workbook()
         self.ws = self.wb.active
